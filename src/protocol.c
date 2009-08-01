@@ -34,7 +34,7 @@ static void on_hand_shake(PPROTO proto, READ_BUFFER * pbuffer)
   int len = rtmp_rb_read(pbuffer, &shake, rtmp_fwb_get_space(&proto->tmp_buf)); //->getSpace());
   rtmp_fwb_write(&(proto->tmp_buf), shake, len);
   if(rtmp_fwb_get_space(&proto->tmp_buf) <= 0) {
-    byte * ack = ALLOC(1537); //new byte[1537]; LOGA(ack);
+    byte * ack = ALLOC(1537);
 
     ack[0] = 3;
     pack_long(ack + 1, 1);
@@ -63,7 +63,7 @@ static void on_ack_back(PPROTO proto, READ_BUFFER * pbuffer)
   }
 }
 
-void rtmp_proto_feed(PPROTO proto, int len) 
+void rtmp_proto_feed(PPROTO proto, int len)
 {
   //trace_buffer(proto->readBuffer, len, ">>>", 60);
   proto->num_up_bytes += len;
@@ -90,11 +90,6 @@ void rtmp_proto_feed(PPROTO proto, int len)
 	    rtmp_proto_log(proto, "WARN", "No packet callback");
           }
 	  clock_t now = clock();
-	  //printf("size=%d, now=%d, last now = %d, cp=%d\n", sizeof(clock_t), now, proto->last_tm_bytes_read, CLOCKS_PER_SEC);
-	  /*if(now - CLOCKS_PER_SEC >= proto->last_tm_bytes_read) {
-	    //rtmp_proto_send_bytes_read(proto);
-	    proto->last_tm_bytes_read = now;
-	    } */
           rtmp_packet_reset(proto);
           rt_pool_reset(&proto->pool);
         }
@@ -103,17 +98,17 @@ void rtmp_proto_feed(PPROTO proto, int len)
     }
   }
   if(buffer.need_more > 0) {
-    proto->lastDataLen = rtmp_rb_get_space(&buffer);
+    proto->last_data_length = rtmp_rb_get_space(&buffer);
 
-    assert(proto->lastDataLen <= 128);
+    assert(proto->last_data_length <= 128);
 
-    if(proto->lastDataLen > 0) {
-      memcpy(proto->lastData, buffer.current, proto->lastDataLen);
+    if(proto->last_data_length > 0) {
+      memcpy(proto->last_data, buffer.current, proto->last_data_length);
     }
   }
 }
 
-void rtmp_proto_feed_data(PPROTO proto, const byte * data, int len) 
+void rtmp_proto_feed_data(PPROTO proto, const byte * data, int len)
 {
   byte * buffer;
 
@@ -132,14 +127,12 @@ void rtmp_proto_feed_data(PPROTO proto, const byte * data, int len)
 
 static size_t _put_last_data(PPROTO proto)
 {
-  size_t mL = proto->lastDataLen;
+  size_t mL = proto->last_data_length;
 
-  if(proto->lastData && proto->lastDataLen > 0){
-    memcpy(proto->readBuffer, proto->lastData, proto->lastDataLen);
+  if(proto->last_data && proto->last_data_length > 0){
+    memcpy(proto->readBuffer, proto->last_data, proto->last_data_length);
   }
-
-  //lastData = NULL;
-  proto->lastDataLen = 0;
+  proto->last_data_length = 0;
   return mL;
 }
 
@@ -157,23 +150,21 @@ void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE * method_table)
   proto->method_table = method_table;
   rt_pool_init(&proto->pool);
   proto->user_data = NULL;
-  proto->readChunkSize = 128;
-  proto->writeChunkSize = 128;
-  proto->lastData = ALLOC(sizeof(byte) * proto->readChunkSize);
+  proto->read_chunk_size = 128;
+  proto->write_chunk_size = 128;
+  proto->last_data = ALLOC(sizeof(byte) * proto->read_chunk_size);
   proto->readBuffer = ALLOC(sizeof(byte) * BUFFER_SZ);
   proto->next_request_id = 1.0;
   proto->pkg_st = 0;
   proto->num_up_bytes = 0;
   proto->num_down_bytes = 0;
   proto->last_tm_bytes_read = clock();
-  //proto->tmp_buf = NULL;
   proto->ack_back_len = 1536;
-  //proto->packFactory = PacketFactory();
-  proto->lastDataLen = 0;
+  proto->last_data_length = 0;
 
   proto->channels_in = (CHANNEL*)ALLOCZ(64 * sizeof(CHANNEL));
   proto->channels_out = (CHANNEL*)ALLOCZ(64 * sizeof(CHANNEL));
-  
+
   memset(proto->last_timers, 0, sizeof(int) * 64);
 
   rtmp_packet_init(proto);
@@ -187,9 +178,9 @@ void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE * method_table)
 
 void rtmp_proto_free(PPROTO proto)
 {
-  if(proto->lastData) {
-    proto->lastDataLen = 0;
-    RELEASE(proto->lastData);
+  if(proto->last_data) {
+    proto->last_data_length = 0;
+    RELEASE(proto->last_data);
   }
   if(proto->readBuffer) {
     RELEASE(proto->readBuffer);
@@ -202,7 +193,7 @@ void rtmp_proto_free(PPROTO proto)
 byte * rtmp_proto_prepare_buffer(PPROTO proto, size_t * plen) {
   size_t pL = _put_last_data(proto);
   assert(pL >= 0);
-  
+
   *plen = BUFFER_SZ - pL;
   byte * buffer = proto->readBuffer + pL;
   return buffer;
@@ -215,14 +206,13 @@ int rtmp_proto_send_packet(PPROTO proto, POOL * ppool, PACKET * pac, BOOLEAN tim
   if(ppool == NULL) {
     ppool = &(proto->pool);
   }
-  
+
   rtmp_wb_init(&buffer, ppool, 1024);
   rtmp_packet_write_packet(proto, &buffer, pac, timer_relative);
   int out_len;
-  byte * out_data = rtmp_wb_get_value(&buffer, &out_len); 
+  byte * out_data = rtmp_wb_get_value(&buffer, &out_len);
   assert(proto->method_table->on_write_data);
   assert(out_len > 0);
-  //return proto->method_table->on_write_data(proto, out_data, out_len);
   return _proto_write_data(proto, out_data, out_len);
 }
 
@@ -236,31 +226,30 @@ void rtmp_proto_send_bytes_read(PPROTO proto)
   byte p[4];
   int len = pack_long(p, proto->num_up_bytes);
   PACKET br_pac;
-  printf("send bytes read %d\n", proto->num_up_bytes);
-  br_pac.channelId = 2;
+  br_pac.channel_id = 2;
   br_pac.data = p;
   br_pac.channel.timer = 0;
   br_pac.channel.size = len;
   br_pac.channel.data_type = PAC_BYTES_READ;
-  br_pac.channel.streamId = 0;
+  br_pac.channel.stream_id = 0;
   br_pac.dataLen = len;
   rtmp_proto_send_packet(proto, NULL, &br_pac, FALSE);
 }
 
 void rtmp_proto_call(PPROTO proto, char * method_name, int argc, AV * argv)
 {
-  int channelId = 3;
+  int channel_id = 3;
   PACKET call_pac;
-  call_pac.channelId = channelId;
-  call_pac.channel.timer = rtmp_packet_get_last_timer(proto, channelId);
+  call_pac.channel_id = channel_id;
+  call_pac.channel.timer = rtmp_packet_get_last_timer(proto, channel_id);
   call_pac.channel.size = 0;
   call_pac.channel.data_type = PAC_INVOKE;
-  call_pac.channel.streamId = 0;
+  call_pac.channel.stream_id = 0;
 
   double request_id = proto->next_request_id;
   proto->next_request_id++;
   int data_len;
-  call_pac.data = amf_pack_call(&proto->pool, method_name, request_id, 
+  call_pac.data = amf_pack_call(&proto->pool, method_name, request_id,
 				argc, argv, &data_len);
   call_pac.dataLen = data_len;
   rtmp_proto_send_packet(proto, NULL, &call_pac, FALSE);
@@ -275,8 +264,11 @@ static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
   assert(request_id_v->type == AMF_NUMBER);
 
   double request_id = request_id_v->value.number_t;
-  proto->next_request_id = request_id + 1;
-  
+
+  if(!amf_string_equal(method_name_v, "_result")) {
+    proto->next_request_id = request_id + 1;
+  }
+
   AV * first_arg_v = amf_ap_read_next(pap);
   int argc;
   AK_ARRAY args;
@@ -286,7 +278,6 @@ static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
     char * keys[] = {
       "level", "code", "description"
     };
-
     char * values [] = {
       "status", "NetConnection.Connect.Success", "Connection Succeeded."
     };
@@ -300,9 +291,9 @@ static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
     AV result_v;
     amf_new_table_elem_list(&proto->pool, table_elems, 3, keys, value_elements);
     amf_new_hash(&proto->pool, &result_v, 3, table_elems);
-    rtmp_proto_packet_return(proto, NULL, pac->channelId, request_id, &result_v);
+    rtmp_proto_packet_return(proto, NULL, pac->channel_id, request_id, &result_v);
   } else if(proto->method_table->on_amf_call) {
-    proto->method_table->on_amf_call(proto, pac->channelId, 
+    proto->method_table->on_amf_call(proto, pac->channel_id,
 				     request_id,
 				     method_name_v,
 				     args.size,
@@ -323,30 +314,30 @@ int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, double 
   amf_new_number(&arguments[1], request_id);
   arguments[2].type = AMF_NIL;  // First args;
   memcpy(&(arguments[3]), ret_val, sizeof(AV));
-  
+
   PACKET result_pac;
-  result_pac.channelId = channel_id;
+  result_pac.channel_id = channel_id;
   result_pac.channel.timer = rtmp_packet_get_last_timer(proto, channel_id);
   result_pac.channel.size = 0;
   result_pac.channel.data_type = PAC_INVOKE;
-  result_pac.channel.streamId = 0;
+  result_pac.channel.stream_id = 0;
   int data_len = 0;
   result_pac.data = amf_pack_arguments(ppool, 4, arguments, &data_len);
   result_pac.dataLen = data_len;
 
   if(data_len > 0) {
-    rtmp_proto_send_packet(proto, ppool, &result_pac, FALSE); 
+    rtmp_proto_send_packet(proto, ppool, &result_pac, FALSE);
   }
 }
 
 static void _default_on_packet_chunk_size(PPROTO proto, PACKET * pac)
 {
   size_t chunk_size = unpack_int(pac->data);
-  if(chunk_size >= proto->lastDataLen) {
+  if(chunk_size >= proto->last_data_length) {
     byte * last_data = ALLOC(sizeof(byte) * chunk_size);
-    memcpy(last_data, proto->lastData, proto->lastDataLen);
-    RELEASE(proto->lastData);
-    proto->lastData = last_data;
+    memcpy(last_data, proto->last_data, proto->last_data_length);
+    RELEASE(proto->last_data);
+    proto->last_data = last_data;
   } else {
     rtmp_proto_log(proto, "WARN", "chunk size smaller than last data length");
   }
@@ -356,18 +347,17 @@ static void _default_on_packet_bytes_read(PPROTO proto, PACKET * pac)
 {
   assert(pac->dataLen == 4);
   int num_bytes_read = unpack_int(pac->data);
-  printf("yes %d\n", num_bytes_read);
 }
 
 
 static void _default_on_packet_ping(PPROTO proto, PACKET * pac)
 {
   PACKET pong_pac;
-  pong_pac.channelId = pac->channelId;
-  pong_pac.channel.timer = rtmp_packet_get_last_timer(proto, pac->channelId);
+  pong_pac.channel_id = pac->channel_id;
+  pong_pac.channel.timer = rtmp_packet_get_last_timer(proto, pac->channel_id);
   pong_pac.channel.size = 0;
   pong_pac.channel.data_type = PAC_PING;
-  pong_pac.channel.streamId = 0;
+  pong_pac.channel.stream_id = 0;
 
   byte * myData = rt_pool_alloc(&(proto->pool), pac->dataLen);
   memcpy(myData, pac->data, pac->dataLen);
@@ -466,8 +456,8 @@ void rtmp_proto_method_table_init(RTMP_METHOD_TABLE * table) {
 
 CHANNEL * rtmp_proto_get_channel(PPROTO proto)
 {
-  assert(proto->channelId < 64);
-  CHANNEL * pchannel = &(proto->channels_in[proto->channelId]);
+  assert(proto->channel_id < 64);
+  CHANNEL * pchannel = &(proto->channels_in[proto->channel_id]);
   assert(pchannel->used == 1);
   return pchannel;
 }

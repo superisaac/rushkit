@@ -3,7 +3,7 @@
 int _pack_empty_string(byte * dest);
 int _pack_end(byte * dest);
 
-// Double 
+// Double
 static double _unpack_double(AP * pap)
 {
   double res = 0.0;
@@ -48,7 +48,7 @@ _unpack_byte(AP * pap)
   return (*(pap->src++));
 }
 
-static int 
+static int
 _pack_byte(byte val, byte * dest)
 {
   *dest = val;
@@ -65,7 +65,7 @@ _unpack_zstr(AP * pap, AK_STRING * pstr)
   return (pstr->size) + 2;
 }
 
-static int 
+static int
 _pack_string(AK_STRING * pstr, byte * dest)
 {
   dest += _pack_short(pstr->size, dest);
@@ -167,7 +167,7 @@ int amf_print_hash(AK_TABLE * ptable)
   printf(")");
 }
 
-int 
+int
 _unpack_assoc_array(AP * pap, AK_TABLE * ptable)
 {
   int size = _unpack_long(pap);
@@ -423,7 +423,7 @@ byte * amf_pack_arguments(POOL * ppool, int count, AV * arguments, int * data_le
   return orig;
 }
 
-byte * amf_pack_call(POOL * ppool, char * method_name, 
+byte * amf_pack_call(POOL * ppool, char * method_name,
 		     double req_id, int count, AV * arguments, int * data_len)
 {
   int i;
@@ -436,7 +436,7 @@ byte * amf_pack_call(POOL * ppool, char * method_name,
   for(i=0; i< 3; i++) {
     sum_cap += amf_get_pack_size(headers + i);
   }
-  
+
   for(i = 0; i< count; i++) {
     sum_cap += amf_get_pack_size(arguments + i);
   }
@@ -456,7 +456,7 @@ byte * amf_pack_call(POOL * ppool, char * method_name,
 }
 
 
-int amf_pack(AV * pvalue, byte * dest) 
+int amf_pack(AV * pvalue, byte * dest)
 {
   int sz = 0;
   byte * p = dest;
@@ -559,7 +559,7 @@ AV * amf_new_array(POOL * ppool, AV * dest, int count, AV * elements)
     memcpy(tmpelems, elements, count * sizeof(AV));
     elements = tmpelems;
   }
-  
+
   dest->type = AMF_ARRAY;
   dest->value.array_t.size = count;
   dest->value.array_t.elements = elements;
@@ -593,13 +593,13 @@ AV * _amf_new_table(POOL * ppool, AV * dest, int table_type, int count, AK_TABLE
   return dest;
 }
 
-AV * 
+AV *
 amf_new_assoc_array(POOL * ppool, AV * dest, int count, AK_TABLE_ELEM * elements)
 {
   return _amf_new_table(ppool, dest, AMF_ASSOC_ARRAY, count, elements);
 }
 
-AV * 
+AV *
 amf_new_hash(POOL * ppool, AV * dest, int count, AK_TABLE_ELEM * elements)
 {
   return _amf_new_table(ppool, dest, AMF_HASH, count, elements);

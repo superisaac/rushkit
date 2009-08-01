@@ -74,16 +74,16 @@ extern "C" {
 
   typedef struct _pool_t
   {
-    listnode * listHead;
-    listnode * listTail;
+    listnode * list_head;
+    listnode * list_tail;
 
-    trunk_t  rootTrunk;
+    trunk_t  root_trunk;
     trunk_t * curr;
-    unsigned int currUsed;
-    unsigned int currCapa;
+    unsigned int curr_used;
+    unsigned int curr_capacity;
 
-    int usedSize; 
-    int allocSpace;
+    int used_size; 
+    int alloc_space;
 
   } POOL;
 
@@ -170,12 +170,12 @@ extern "C" {
     int timer;
     int size;
     int data_type; 
-    int streamId;
+    int stream_id;
   } CHANNEL;
 
   typedef struct
   {
-    int channelId;
+    int channel_id;
     CHANNEL channel;
     byte * data;
     int dataLen;
@@ -191,15 +191,15 @@ extern "C" {
     int pkg_st;
     void * user_data;
     struct method_table_t * method_table;
-    size_t lastDataLen;
-    byte * lastData; 
+    size_t last_data_length;
+    byte * last_data; 
     byte * readBuffer;
-    int readChunkSize;
-    int writeChunkSize;
+    int read_chunk_size;
+    int write_chunk_size;
 
     int state;
     int packet_mask;
-    int channelId;
+    int channel_id;
 
     CHANNEL * channels_in;
     CHANNEL * channels_out;
@@ -255,10 +255,10 @@ extern "C" {
   PACKET * rtmp_packet_get_packet(PPROTO proto, READ_BUFFER * Buffer);
   void rtmp_packet_reset(PPROTO proto);
   void rtmp_packet_init(PPROTO proto);
-  void rtmp_packet_clear_out_channel(PPROTO proto, int channelId);
-  void rtmp_packet_clear_in_channel(PPROTO proto, int channelId);
-  void rtmp_packet_delete_out_channel(PPROTO proto, int channelId);
-  void rtmp_packet_delete_in_channel(PPROTO proto, int channelId);
+  void rtmp_packet_clear_out_channel(PPROTO proto, int channel_id);
+  void rtmp_packet_clear_in_channel(PPROTO proto, int channel_id);
+  void rtmp_packet_delete_out_channel(PPROTO proto, int channel_id);
+  void rtmp_packet_delete_in_channel(PPROTO proto, int channel_id);
   int rtmp_packet_write_packet(PPROTO proto, WRITE_BUFFER * buffer, PACKET * pac, BOOLEAN timer_relative);
   int rtmp_packet_get_last_timer(PPROTO proto, int fn);
 
@@ -332,7 +332,7 @@ extern "C" {
 
   void amf_print_string(AK_STRING * pstr);
 
-  int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channelId, double request_id, AV * ret_val);
+  int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, double request_id, AV * ret_val);
 
 #ifdef __cplusplus 
 }

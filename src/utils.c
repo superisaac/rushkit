@@ -9,7 +9,7 @@ static inline int __load_data(byte * src, int len, byte * dest, int is_small_end
     dest += len - 1;
     register int i;
     for(i=0; i< len; i++){
-      *dest = *src;      
+      *dest = *src;
       src ++;
       dest --;
     }
@@ -64,7 +64,7 @@ short unpack_short(byte * buf)
   return value;
 }
 
-void 
+void
 trace_buffer(const byte * buffer, int len, char * prompt, int limit)
 {
   int i;
@@ -84,7 +84,7 @@ trace_buffer(const byte * buffer, int len, char * prompt, int limit)
 }
 
 
-const char * 
+const char *
 trace_str(const byte * buffer, int len, char * prompt, int limit)
 {
   static char outbuffer[256];
@@ -98,7 +98,7 @@ trace_str(const byte * buffer, int len, char * prompt, int limit)
     } else {
       sprintf(p, "\\x%02x", (unsigned char)buffer[i]);
       p += strlen(p);
-      
+
     }
     if(i>limit) {
       sprintf(p, "...");
@@ -119,7 +119,7 @@ byte * ALLOCZ(size_t size)
 {
   byte * ptr = ALLOC(size);
   memset(ptr, 0, size);
-  return ptr; 
+  return ptr;
 }
 
 void RELEASE(void * ptr)

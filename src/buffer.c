@@ -1,5 +1,4 @@
 #include "rtmp_proto.h"
-//#include "pool.h"
 
 // Read Buffer
 void rtmp_rb_init(READ_BUFFER * pbuffer, byte * data, int alen)
@@ -21,7 +20,6 @@ byte * rtmp_rb_read_until(READ_BUFFER * pbuffer, int * cLen, byte c)
       return t;
     }
   }
-  //throw pbuffer->len;
   pbuffer->need_more = pbuffer->len;
   return NULL;
 }
@@ -31,16 +29,9 @@ byte * rtmp_rb_read_e(READ_BUFFER * pbuffer, int nlen)
 {
   int sz_now = rtmp_rb_get_space(pbuffer);
   assert(sz_now >= nlen);
-  //if(sz_now >= nlen){
   byte * t = pbuffer->current;
   pbuffer->current += nlen;
   return t;
-    //  } else {
-    
-    //throw nlen - sz_now;
-    //    pbuffer->need_more = nlen_sz_now;
-    //    return NULL;
-    //  }
 }
 
 
@@ -88,17 +79,16 @@ int rtmp_rb_read_medium_int_e(READ_BUFFER * pbuffer)
 }
 
 
-BOOLEAN rtmp_rb_assert_size(READ_BUFFER * pbuffer, int sz) 
+BOOLEAN rtmp_rb_assert_size(READ_BUFFER * pbuffer, int sz)
 {
   if(sz  + pbuffer->current - pbuffer->buf > pbuffer->len ){
-    //throw sz + pbuffer->current - pbuffer->buf - pbuffer->len;
     pbuffer->need_more = sz + pbuffer->current - pbuffer->buf - pbuffer->len;
     return FALSE;
   }
   return TRUE;
 }
 
-int rtmp_rb_get_space(READ_BUFFER * pbuffer) 
+int rtmp_rb_get_space(READ_BUFFER * pbuffer)
 {
   int a=  pbuffer->buf + pbuffer->len - pbuffer->current;
   return a;
@@ -126,13 +116,12 @@ int rtmp_rb_read(READ_BUFFER * pbuffer, byte ** dest, int nlen)
   }
 }
 
-
 // Write buffer
 void rtmp_wb_init(WRITE_BUFFER * pbuffer, POOL * pool, int capacity)
 {
   pbuffer->pool = pool;
   pbuffer->capacity = capacity;
-  pbuffer->buf = rt_pool_alloc(pbuffer->pool, capacity); LOGAA(buf);
+  pbuffer->buf = rt_pool_alloc(pbuffer->pool, capacity);
   pbuffer->current = pbuffer->buf;
 }
 
@@ -153,13 +142,13 @@ int rtmp_wb_write(WRITE_BUFFER * pbuffer, byte *data, int len)
     }
 
     byte * tmp_buff;
-    tmp_buff = rt_pool_alloc(pbuffer->pool, new_cap); LOGAA(tmp_buff);
+    tmp_buff = rt_pool_alloc(pbuffer->pool, new_cap);
     memcpy(tmp_buff, pbuffer->buf, sz_now);
 
     pbuffer->buf = tmp_buff;
     pbuffer->current = sz_now + pbuffer->buf;
-    pbuffer->capacity = new_cap; 
-  } 
+    pbuffer->capacity = new_cap;
+  }
   memcpy(pbuffer->current, data, len);
   pbuffer->current += len;
   return len;
@@ -195,7 +184,7 @@ int rtmp_wb_write_reverse_int(WRITE_BUFFER * pbuffer, long src)
 int rtmp_wb_write_int(WRITE_BUFFER * pbuffer, long src)
 {
   int sz = 4;
-  byte dest[sz]; //sizeof(src)];
+  byte dest[sz];
   load_data((byte*)(&src), sz, dest);
   return rtmp_wb_write(pbuffer, dest, sz);
 }
