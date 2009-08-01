@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<movie version="8" width="320" height="200" framerate="12">
+  <background color="#505090"/>
+  <frame>
+    <library>
+      <clip id = "windowDesk">
+      </clip>
+      <clip id="comp" import="widget_base.swf"/>
+    </library>
+    <call object="App" method="main"/>
+  </frame>
+</movie> 
