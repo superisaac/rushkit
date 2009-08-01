@@ -37,7 +37,7 @@ class App {
 
 	var sport = 1935;
 	_root._rtmp_port = sport;	
-	_root._rtmp_url = "rtmp://" + _root._host + ":" + _root._rtmp_port; 
+	_root._rtmp_url = "rtmp://" + _root._host + ":" + _root._rtmp_port;
 
 	_root.main_nc = new NetConnection();
 	_root.main_nc.greeting = function(word) {
@@ -67,7 +67,6 @@ class App {
     function connectionClosed(){
 	
     }
-    
     function initialize() {
 	var app = App.app;
 

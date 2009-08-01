@@ -7,7 +7,7 @@ WIDGETSWF = widget.swf
 # Actionscript files
 WIDGET_AS= App.as
 
-$(WIDGETSWF): main.xml widget_base.swf 
+$(WIDGETSWF): main.xml widget_base.swf
 	$(SWFMILL) simple main.xml $@
 
 widget_base.swf :  $(WIDGET_AS)

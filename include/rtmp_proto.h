@@ -29,11 +29,6 @@ extern "C" {
 #include <assert.h>
 #include <string.h>
 
-#define LOGA(d)
-#define LOGAA(d)
-#define LOGD(d)
-#define LOGDA(d)
-
 #define  PAC_CHUNK_SIZE 0x01
 #define  PAC_BYTES_READ 0x03
 #define  PAC_PING 0x4
@@ -41,7 +36,7 @@ extern "C" {
 
 #define  PAC_INVOKE 0x14
 #define  PAC_NOTIFY 0x12
-    
+
 #define  PAC_AUDIO  0x8
 #define  PAC_VIDEO  0x9
 
@@ -100,7 +95,7 @@ extern "C" {
     unsigned int curr_used;
     unsigned int curr_capacity;
 
-    int used_size; 
+    int used_size;
     int alloc_space;
 
   } POOL;
@@ -144,7 +139,6 @@ extern "C" {
   byte *rtmp_rb_read_string_e(READ_BUFFER * pbuffer, int * strlen);
   int rtmp_rb_read(READ_BUFFER * pbuffer, byte ** dest, int nlen);
 
-
   typedef struct write_buffer_t
   {
     byte * buf;
@@ -167,7 +161,7 @@ extern "C" {
   int rtmp_wb_write_string(WRITE_BUFFER * pbuffer, byte * str, int len);
   int probe_small_endian();
 
-  typedef struct fix_buffer_t 
+  typedef struct fix_buffer_t
   {
     byte * buf;
     byte * current;
@@ -187,7 +181,7 @@ extern "C" {
     int used;
     int timer;
     int size;
-    int data_type; 
+    int data_type;
     int stream_id;
   } CHANNEL;
 
@@ -210,7 +204,7 @@ extern "C" {
     void * user_data;
     struct method_table_t * method_table;
     size_t last_data_length;
-    byte * last_data; 
+    byte * last_data;
     byte * readBuffer;
     int read_chunk_size;
     int write_chunk_size;
@@ -224,7 +218,7 @@ extern "C" {
 
     FIX_BUFFER data_buffer;
     int last_timers[64];
-  
+
     int num_up_bytes;
     int num_down_bytes;
     clock_t last_tm_bytes_read;
@@ -248,8 +242,8 @@ extern "C" {
     void (*on_packet_invoke)(PPROTO proto, PACKET *);
     void (*on_packet_audio)(PPROTO proto, PACKET *);
     void (*on_packet_video)(PPROTO proto, PACKET *);
-    void (*on_amf_call)(PPROTO prot, int channle_id, 
-			double request_id, struct amf_value_t * method_name, 
+    void (*on_amf_call)(PPROTO prot, int channle_id,
+			double request_id, struct amf_value_t * method_name,
 			int argc, struct amf_value_t * args);
     void (*on_log)(PPROTO proto, char * level, char * message);
 
@@ -279,7 +273,6 @@ extern "C" {
   void rtmp_packet_delete_in_channel(PPROTO proto, int channel_id);
   int rtmp_packet_write_packet(PPROTO proto, WRITE_BUFFER * buffer, PACKET * pac, BOOLEAN timer_relative);
   int rtmp_packet_get_last_timer(PPROTO proto, int fn);
-
 
   // AMF pickler
   typedef struct amf_pickler_t {
@@ -314,7 +307,7 @@ extern "C" {
       double number_t;
       AK_ARRAY array_t;
       AK_STRING string_t;
-      AK_TABLE table_t;    
+      AK_TABLE table_t;
     } value;
   } AV;
 
@@ -329,7 +322,7 @@ extern "C" {
   AV * amf_ap_read_array(AP * pap, int *len);
   AV * amf_ap_read_arguments(AP * pap, AK_ARRAY * parray);
   AV * amf_ap_read_next(AP * pap);
-  byte * amf_pack_call(POOL * ppool, char * method_name, 
+  byte * amf_pack_call(POOL * ppool, char * method_name,
 		       double req_id, int count, AV * arguments, int * data_len);
 
   int amf_get_pack_size(AV * pvalue);
@@ -352,7 +345,7 @@ extern "C" {
 
   int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, double request_id, AV * ret_val);
 
-#ifdef __cplusplus 
+#ifdef __cplusplus
 }
 #endif
 

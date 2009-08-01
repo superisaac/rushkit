@@ -59,9 +59,8 @@ on_rtmp_read(int fd, short ev, void *arg)
   int len = client->receiveData(fd);
   if(len <= 0){
     client->onClosed();
-    //event_del(&client->ev);
     cout << "empty data received " << endl;
-     LOGD(client); delete client;
+    delete client;
   }
 }
 void
@@ -75,10 +74,7 @@ on_accept(int fd, short ev, void *arg)
   socklen_t client_len = sizeof(client_addr);
 #endif
 
-  //struct event * ev_switch = (struct event*)calloc(1, sizeof(struct event)); LOGA(ev_switch);
-
   client_fd = accept(fd, (struct sockaddr *)&client_addr, &client_len);
-  //std::cout << "accept socket " << client_fd << " " <<fd << std::endl;
   if (client_fd < 0) {
     warn("accept failed");
     return;
@@ -88,8 +84,7 @@ on_accept(int fd, short ev, void *arg)
   if (setsockflag(client_fd) < 0) {
     warn("failed to set client socket non-blocking");
   }
-  //switch_proto(client_fd);
-  Connection * client = new Connection(client_fd); LOGA(client);
+  Connection * client = new Connection(client_fd);
   event_set(&client->ev, client_fd, EV_READ|EV_PERSIST, on_rtmp_read, client);
   event_add(&client->ev, NULL);
 }
@@ -182,8 +177,6 @@ int main(int argc, char **argv)
   init_daemon(DAEMON_PORT, &ev_accept, on_accept);
 
   greeting();
-  
-  //Connection::sendBytesRead();
   event_dispatch();
   return 0;
 }

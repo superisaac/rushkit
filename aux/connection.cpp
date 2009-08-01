@@ -53,7 +53,7 @@ static void _on_amf_call(PPROTO proto, int channelId, double request_id, AV * me
     rtmp_proto_call(proto, "greeting", 1, &word);
   }
 }
-int 
+int
 Connection::writeData(byte * data, int len)
 {
   //nDownBytes += len;
@@ -87,24 +87,19 @@ Connection::get(int connId)
   }
 }
 
-Connection::Connection (int client_fd) 
+Connection::Connection (int client_fd)
 {
   fd = client_fd;
   fcId = 1;
   conn_st = CONN_ST_WORKING;
-  //lastData = new byte[proto.packFactory.readChunkSize]; LOGA(lastData);
-
-  ///lastDataLen = 0;
-
   connId = nextConnectionId++;
   connectionMap[connId] = this;
   brev = NULL;
-
   rtmp_proto_init(&proto, &method_table);
   rtmp_proto_set_user_data(&proto, this);
 }
 
-Connection::~Connection () 
+Connection::~Connection ()
 {
 
   rtmp_proto_free(&proto);
@@ -116,12 +111,11 @@ Connection::~Connection ()
   close();
 }
 
-int 
+int
 Connection::receiveData(int fd)
 {
   size_t capacity;
-  byte * buffer = rtmp_proto_prepare_buffer(&proto, &capacity);  
-
+  byte * buffer = rtmp_proto_prepare_buffer(&proto, &capacity);
 
   int len = read(fd, (char*)buffer, capacity);
   assert(len <= capacity);
