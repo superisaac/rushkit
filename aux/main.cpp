@@ -89,7 +89,6 @@ on_accept(int fd, short ev, void *arg)
   event_add(&client->ev, NULL);
 }
 
-
 struct event term_ev;
 void on_interrupt(int fd, short ev, void * arg)
 {
@@ -170,7 +169,6 @@ int main(int argc, char **argv)
   /* signaler handlers */
   signal_set(&term_ev, SIGINT, on_interrupt, NULL);
   signal_add(&term_ev, NULL);
-
 
   // Prepare listen socket
   struct event ev_accept;

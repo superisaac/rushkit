@@ -26,7 +26,6 @@ class App {
     {
 	var preTxt = App.app._windowDesk.debug.text;
 	App.app._windowDesk.debug.text = str + "\n" + preTxt;
-	//flash.external.ExternalInterface.call("debug_flv", str);
     }
 
     static function setupNetwork() {
@@ -101,10 +100,8 @@ class App {
 
     // entry point
     static function main(){
-            System.security.allowDomain("10.0.0.5");
 	Stage.scaleMode = "noscale";
 	Stage.align = "tl";
-	
 	App.setup();
     }
 }
