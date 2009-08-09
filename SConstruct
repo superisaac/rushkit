@@ -5,7 +5,7 @@ env = Environment(CPPPATH="include",
 
 proto_src = ['rt_pool.c', 'buffer.c', 'packet.c', 'protocol.c',
 	  'amf.c', 'utils.c']
-env.Library('lib/librushkit.a', ['src/%s' % f for f in proto_src])
+env.Library('lib/librushcore.a', ['core/src/%s' % f for f in proto_src])
 
 
 demo_src = ["connection.cpp", 'main.cpp']
@@ -18,7 +18,7 @@ if sys.platform.startswith('darwin'): # mac
 env = Environment(CPPPATH=cpppath,
                   CXXFLAGS='-g ',
                   LDFLAGS='-static',
-                  LIBS=['event', 'rushkit'],
+                  LIBS=['event', 'rushcore'],
                   LIBPATH=libpath)
 env.Program('bin/demo-server',
             ['aux/%s' % f for f in demo_src])
@@ -56,8 +56,8 @@ def SWIGSharedLibrary(env, library, sources, **args):
 env = Environment(CPPPATH=cpppath + ['/usr/include/python2.5'],
                   CXXFLAGS='-g ',
                   LDFLAGS='-static',
-                  LIBS=['python2.5', 'rushkit'],
+                  LIBS=['python2.5', 'rushcore'],
                   LIBPATH=['lib'])
 env['BUILDERS']['PythonModule'] = SWIGSharedLibrary
-env.PythonModule('_pyrushkit', ['bindings/rushkit.i'])
+env.PythonModule('pyrushkit', ['bindings/python/pyrushkit.c'])
 
