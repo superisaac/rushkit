@@ -17,7 +17,7 @@
  * Email: superisaac.ke@gmail.com
  */
 
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 // Read Buffer
 void rtmp_rb_init(READ_BUFFER * pbuffer, byte * data, int alen)

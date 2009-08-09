@@ -17,7 +17,7 @@
  * Email: superisaac.ke@gmail.com
  */
 
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 void rtmp_proto_log(PPROTO proto, char * level, char * message) {
   if(proto->method_table->on_log) {

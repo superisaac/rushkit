@@ -17,7 +17,7 @@
  * Email: superisaac.ke@gmail.com
  */
 
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 int system_is_small_endian = 1;
 

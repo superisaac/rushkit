@@ -17,7 +17,7 @@
  * Email: superisaac.ke@gmail.com
  */
 
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 #define POOL_GRANU 2048
 #define POOL_EXTRA_SPACE  2048;

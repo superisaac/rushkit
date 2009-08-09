@@ -17,7 +17,7 @@
  * Email: superisaac.ke@gmail.com
  */
 
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 int _pack_empty_string(byte * dest);
 int _pack_end(byte * dest);

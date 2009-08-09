@@ -55,7 +55,7 @@
 
 #include <map>
 #include <event.h>
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 #define CONN_ST_WORKING 1000
 #define CONN_ST_CLOSED 1001

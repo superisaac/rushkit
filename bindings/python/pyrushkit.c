@@ -1,5 +1,5 @@
 #include <Python.h>
-#include "rtmp_proto.h"
+#include "rushkit.h"
 
 static PyObject * init_test(PyObject * self, PyObject * args) {
   return Py_BuildValue("i", 5);
