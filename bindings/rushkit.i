@@ -1,7 +1,8 @@
 %module pyrushkit
 
 %{
-#include "rtmp_proto.h"
+#include <Python.h>
+#include "rushkit.h"
 %}
   typedef struct method_table_t {
     /* callbacks */
@@ -54,3 +55,8 @@
   typedef RTMP_PROTO * PPROTO;
   void rtmp_proto_method_table_init(RTMP_METHOD_TABLE *);
   void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE *);
+
+#if defined(SWIGPYTHON)
+  void environment_init();
+  void init_responder(PPROTO  proto, PyObject * responder);
+#endif

@@ -59,5 +59,5 @@ env = Environment(CPPPATH=cpppath + ['/usr/include/python2.5'],
                   LIBS=['python2.5', 'rushcore'],
                   LIBPATH=['lib'])
 env['BUILDERS']['PythonModule'] = SWIGSharedLibrary
-env.PythonModule('pyrushkit', ['bindings/python/pyrushkit.c'])
+env.PythonModule('_pyrushkit', ['bindings/rushkit.i', 'bindings/python/pyrushkit.c'])
 
