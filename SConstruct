@@ -1,7 +1,8 @@
 import sys
 
 env = Environment(CPPPATH="include",
-                  CXXFLAGS='-g ')
+                  CXXFLAGS='-g ',
+		  CFLAGS='-g ')
 
 proto_src = ['rt_pool.c', 'buffer.c', 'packet.c', 'protocol.c',
 	  'amf.c', 'utils.c']
@@ -55,6 +56,7 @@ def SWIGSharedLibrary(env, library, sources, **args):
  
 env = Environment(CPPPATH=cpppath + ['/usr/include/python2.5'],
                   CXXFLAGS='-g ',
+		  CFLAGS='-g ',
                   LDFLAGS='-static',
                   LIBS=['python2.5', 'rushcore'],
                   LIBPATH=['lib'])

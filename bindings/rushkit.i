@@ -55,8 +55,12 @@
   typedef RTMP_PROTO * PPROTO;
   void rtmp_proto_method_table_init(RTMP_METHOD_TABLE *);
   void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE *);
+  void * rtmp_proto_get_user_data(PPROTO proto);
+  void rtmp_proto_set_user_data(PPROTO proto, void * user_data);
 
 #if defined(SWIGPYTHON)
-  void environment_init();
-  void init_responder(PPROTO  proto, PyObject * responder);
+void environment_init();
+void init_responder(PPROTO  proto, PyObject * responder);
+void free_responder(PPROTO proto);
+PyObject * get_py_data(PPROTO proto);
 #endif

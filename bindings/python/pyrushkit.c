@@ -1,22 +1,40 @@
 #include <Python.h>
 #include "rushkit.h"
 
+typedef  PyObject * PYOBJ;
 static RTMP_METHOD_TABLE method_table;
 
 void environment_init() {
   rtmp_proto_method_table_init(&method_table);
 }
 
-void init_responder(PPROTO proto, PyObject * responder) {
+static PYOBJ _get_py_data(PPROTO proto) {
+  return (PYOBJ)rtmp_proto_get_user_data(proto);
+}
+
+PYOBJ get_py_data(PPROTO proto) {
+  PYOBJ obj = _get_py_data(proto);
+  Py_XINCREF(obj);
+  return obj;
+}
+
+void init_responder(PPROTO proto, PYOBJ responder) {
   rtmp_proto_init(proto, &method_table);
-  PyObject * old = (PyObject *)rtmp_proto_get_user_data(proto);
-  if(old != NULL) {
-    Py_DECREF(old);
-  }
-  Py_INCREF(responder);
+  PYOBJ old = _get_py_data(proto);
+  Py_XDECREF(old);
+  Py_XINCREF(responder);
   rtmp_proto_set_user_data(proto, responder);
 }
-/*static PyObject * (PyObject * self, PyObject * args) {
+
+
+void free_responder(PPROTO proto)
+{
+  PYOBJ data = _get_py_data(proto);
+  Py_XDECREF(data);
+  rtmp_proto_set_user_data(proto, NULL);
+}
+
+/*static PYOBJ (PYOBJ self, PYOBJ args) {
   return Py_BuildValue("i", 5);
 }
 
