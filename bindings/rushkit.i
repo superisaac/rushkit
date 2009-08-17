@@ -52,11 +52,13 @@
 
     double next_request_id;
   } RTMP_PROTO;
-  typedef RTMP_PROTO * PPROTO;
+typedef RTMP_PROTO * PPROTO;
+
+%apply PPROTO INPUT {PPROTO proto};
   void rtmp_proto_method_table_init(RTMP_METHOD_TABLE *);
   void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE *);
-  void * rtmp_proto_get_user_data(PPROTO proto);
-  void rtmp_proto_set_user_data(PPROTO proto, void * user_data);
+//void * rtmp_proto_get_user_data(PPROTO proto);
+//void rtmp_proto_set_user_data(PPROTO proto, void * user_data);
 
 #if defined(SWIGPYTHON)
 void environment_init();
