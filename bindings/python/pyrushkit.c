@@ -21,14 +21,6 @@ static PYOBJ _get_member(PPROTO proto, const char * member_name) {
   return member;
 }
 
-static PYOBJ _get_member_obj(PPROTO proto, PYOBJ member_name) {
-  PYOBJ data = _get_py_data(proto);
-  PYOBJ member = PyObject_GetAttr(data, member_name);
-  
-  return member;
-}
-
-
 PYOBJ get_py_data(PPROTO proto) {
   PYOBJ obj = _get_py_data(proto);
   Py_XINCREF(obj);
@@ -37,24 +29,28 @@ PYOBJ get_py_data(PPROTO proto) {
 
 void on_py_amf_call(PPROTO proto, int cid, int reqid, AV * method_name, int argc, AV * args)
 {
-  PYOBJ func_name = av_2_py(method_name);
-  Py_XINCREF(func_name);
-  PYOBJ func = _get_member_obj(proto, func_name);
-
-
-  Py_XINCREF(func);
-  PYOBJ arglist = PyList_New(argc + 2);
-  Py_XINCREF(arglist);
-
-  PyList_Append(arglist, _get_py_data(proto));
-
-  PyList_Append(arglist, func_name);
-  Py_XDECREF(func_name);
-
-  av_list_2_py(arglist, args, argc);
-  PyEval_CallObject(func, arglist);
-
-  Py_XDECREF(func);
+  PYOBJ func = _get_member(proto, "handle_invoke");
+  if(func) {
+    Py_XINCREF(func);
+    
+    PYOBJ func_name = av_2_py(method_name);
+    Py_XINCREF(func_name);
+    
+    PYOBJ arglist = PyList_New(argc + 2);
+    Py_XINCREF(arglist);
+    
+    PyList_Append(arglist, _get_py_data(proto));
+    
+    PyList_Append(arglist, func_name);
+    Py_XDECREF(func_name);
+    
+    av_list_2_py(arglist, args, argc);
+    PyEval_CallObject(func, arglist);
+    
+    Py_XDECREF(func);
+  } else {
+    printf("no handle_invoke() defined\n");
+  }
 }
 
 void init_responder(PPROTO proto, PYOBJ responder) {
@@ -65,6 +61,16 @@ void init_responder(PPROTO proto, PYOBJ responder) {
   Py_XDECREF(old);
   Py_XINCREF(responder);
   rtmp_proto_set_user_data(proto, responder);
+}
+
+int feed_data(PPROTO proto, PYOBJ data) {
+  char * buffer;
+  int length;
+  Py_XINCREF(data);
+  PyString_AsStringAndSize(data, &buffer, &length);
+  rtmp_proto_feed_data(proto, buffer, length);
+  Py_XDECREF(data);
+  return length;
 }
 
 void free_responder(PPROTO proto)

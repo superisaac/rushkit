@@ -16,5 +16,6 @@ b = rushkit.get_py_data(proto)
 print id(a), id(b)
 
 rushkit.free_responder(proto)
+rushkit.feed_data(proto, '\x03')
 rushkit.delete_RTMP_PROTO(proto)
 
