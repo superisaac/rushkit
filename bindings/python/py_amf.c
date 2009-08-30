@@ -22,12 +22,11 @@ PyObject * av_table_2_py(AK_TABLE * table)
   return Py_None;
 }
 
-PyObject * av_list_2_py(PyObject * plist, AV * avalues, int size)
+PyObject * av_list_2_py(AV * avalues, int size)
 {
   int i;
-  if(plist == NULL) {
-    plist = PyList_New(size);
-  }
+  PyObject * plist = PyList_New(0);
+
   Py_XINCREF(plist);
   for(i = 0; i< size; i++) {
     PyObject * elem = av_2_py(avalues + i);
@@ -41,7 +40,7 @@ PyObject * av_list_2_py(PyObject * plist, AV * avalues, int size)
 
 PyObject * av_array_2_py(AK_ARRAY * array)
 {
-  return av_list_2_py(NULL, array->elements, array->size);
+  return av_list_2_py(array->elements, array->size);
 }
 
 PyObject * av_2_py(AV * pvalue)

@@ -5,7 +5,7 @@ typedef  PyObject * PYOBJ;
 static RTMP_METHOD_TABLE method_table;
 
 extern PyObject * av_2_py(AV*);
-extern PyObject * av_list_2_py(PYOBJ, AV*, int);
+extern PyObject * av_list_2_py(AV*, int);
 
 void environment_init() {
   rtmp_proto_method_table_init(&method_table);
@@ -27,26 +27,52 @@ PYOBJ get_py_data(PPROTO proto) {
   return obj;
 }
 
-void on_py_amf_call(PPROTO proto, int cid, int reqid, AV * method_name, int argc, AV * args)
+int on_py_write_data(PPROTO proto, byte * data, int len)
 {
-  PYOBJ func = _get_member(proto, "handle_invoke");
+  PyObject * func = _get_member(proto, "handleWriteData");
+  if(func) {
+    Py_XINCREF(func);
+
+    PyObject * arglist = Py_BuildValue("(s#)",data, len);
+    Py_XINCREF(arglist);
+
+    PyObject_CallObject(func, arglist);    
+    Py_XDECREF(arglist);
+    Py_XDECREF(func);
+    return len;
+  } else {
+    printf("no method handleWriteData()");
+  }
+  return 0;
+}
+
+void on_py_amf_call(PPROTO proto, int cid, double reqid, AV * method_name, int argc, AV * args)
+{
+  PYOBJ func = _get_member(proto, "handleInvoke");
   if(func) {
     Py_XINCREF(func);
     
     PYOBJ func_name = av_2_py(method_name);
     Py_XINCREF(func_name);
     
-    PYOBJ arglist = PyList_New(argc + 2);
+    PYOBJ call_args = av_list_2_py(args, argc);
+    Py_XINCREF(call_args);
+
+    
+    PYOBJ arglist = Py_BuildValue("(OO)", func_name, call_args);
+    //PYOBJ arglist = PyTuple_New(2);
     Py_XINCREF(arglist);
-    
-    PyList_Append(arglist, _get_py_data(proto));
-    
-    PyList_Append(arglist, func_name);
+
+    //PyTuple_SetItem(arglist, 0, _get_py_data(proto));
+    //PyTuple_SetItem(arglist, 1, func_name);
+    printf("1\n");
+    //PyTuple_SetItem(arglist, 2, call_args);
+    printf("2\n");
+    PyObject_CallObject(func, arglist);
+    printf("3\n");
+
+    Py_XDECREF(call_args);
     Py_XDECREF(func_name);
-    
-    av_list_2_py(arglist, args, argc);
-    PyEval_CallObject(func, arglist);
-    
     Py_XDECREF(func);
   } else {
     printf("no handle_invoke() defined\n");
@@ -56,6 +82,7 @@ void on_py_amf_call(PPROTO proto, int cid, int reqid, AV * method_name, int argc
 void init_responder(PPROTO proto, PYOBJ responder) {
   rtmp_proto_init(proto, &method_table);
   method_table.on_amf_call = on_py_amf_call;
+  method_table.on_write_data = on_py_write_data;
 
   PYOBJ old = _get_py_data(proto);
   Py_XDECREF(old);
@@ -65,10 +92,10 @@ void init_responder(PPROTO proto, PYOBJ responder) {
 
 int feed_data(PPROTO proto, PYOBJ data) {
   char * buffer;
-  int length;
+  Py_ssize_t length;
   Py_XINCREF(data);
   PyString_AsStringAndSize(data, &buffer, &length);
-  rtmp_proto_feed_data(proto, buffer, length);
+  rtmp_proto_feed_data(proto, (byte*)buffer, length);
   Py_XDECREF(data);
   return length;
 }
