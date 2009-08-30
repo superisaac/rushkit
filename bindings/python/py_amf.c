@@ -1,14 +1,47 @@
 #include <Python.h>
 #include "rushkit.h"
 
-PyObject * av_table_2_py(AK_TABLE * table_t)
+PyObject * av_2_py(AV * pvalue);
+
+PyObject * av_table_2_py(AK_TABLE * table)
 {
+  int i;
+  PyObject * pdict = PyDict_New();
+  Py_XINCREF(pdict);
+  for(i = 0; i< table->size; i++) {
+    PyObject * key = PyString_FromStringAndSize((char*)(table->elements[i].key.content),
+						table->elements[i].key.size);
+    Py_XINCREF(key);
+    PyObject * value = av_2_py(&(table->elements[i].value));
+    Py_XINCREF(value);
+    PyDict_SetItem(pdict, key, value);
+    Py_XDECREF(key);
+    Py_XDECREF(value);
+  }
+  Py_XDECREF(pdict);
   return Py_None;
 }
 
-PyObject * av_array_2_py(AK_TABLE * table_t)
+PyObject * av_list_2_py(PyObject * plist, AV * avalues, int size)
 {
-  return Py_None;
+  int i;
+  if(plist == NULL) {
+    plist = PyList_New(size);
+  }
+  Py_XINCREF(plist);
+  for(i = 0; i< size; i++) {
+    PyObject * elem = av_2_py(avalues + i);
+    Py_XINCREF(elem);
+    PyList_Append(plist, elem);
+    Py_XDECREF(elem);
+  }
+  Py_XDECREF(plist);
+  return plist;
+}
+
+PyObject * av_array_2_py(AK_ARRAY * array)
+{
+  return av_list_2_py(NULL, array->elements, array->size);
 }
 
 PyObject * av_2_py(AV * pvalue)

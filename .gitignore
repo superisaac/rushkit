@@ -5,3 +5,4 @@
 *.swf
 lib/*
 bin
+*_wrap.c
