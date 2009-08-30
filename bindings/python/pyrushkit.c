@@ -57,19 +57,11 @@ void on_py_amf_call(PPROTO proto, int cid, double reqid, AV * method_name, int a
     
     PYOBJ call_args = av_list_2_py(args, argc);
     Py_XINCREF(call_args);
-
     
-    PYOBJ arglist = Py_BuildValue("(OO)", func_name, call_args);
-    //PYOBJ arglist = PyTuple_New(2);
+    PYOBJ arglist = Py_BuildValue("(dOO)", reqid, func_name, call_args);
     Py_XINCREF(arglist);
 
-    //PyTuple_SetItem(arglist, 0, _get_py_data(proto));
-    //PyTuple_SetItem(arglist, 1, func_name);
-    printf("1\n");
-    //PyTuple_SetItem(arglist, 2, call_args);
-    printf("2\n");
     PyObject_CallObject(func, arglist);
-    printf("3\n");
 
     Py_XDECREF(call_args);
     Py_XDECREF(func_name);

@@ -5,11 +5,10 @@ import _pyrushkit as rushkit
 
 class RTMPProtocol(Protocol):
     def handleWriteData(self, data, *args):
-        print 'handle write data', repr(data), args
         self.transport.write(data)
 
-    def handleInvoke(self, *args):
-        print '--', args
+    def handleInvoke(self, reqid, methodname, args):
+        print '--', reqid, methodname, args
         
     def connectionMade(self):
         print 'connection made'
@@ -17,7 +16,6 @@ class RTMPProtocol(Protocol):
         rushkit.init_responder(self._proto, self)        
 
     def dataReceived(self, data):
-        print '>>>', repr(data)
         rushkit.feed_data(self._proto, data)
     
     def connectionLost(self, reason):
