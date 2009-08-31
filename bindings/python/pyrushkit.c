@@ -67,7 +67,7 @@ void on_py_amf_call(PPROTO proto, int cid, double reqid, AV * method_name, int a
     Py_XDECREF(func_name);
     Py_XDECREF(func);
   } else {
-    printf("no handle_invoke() defined\n");
+    printf("no handleInvoke() defined\n");
   }
 }
 
@@ -99,3 +99,12 @@ void free_responder(PPROTO proto)
   rtmp_proto_set_user_data(proto, NULL);
 }
 
+void amf_return(PPROTO proto, double reqid, PyObject * retv)
+{
+  POOL pool;
+  rt_pool_init(&pool);
+  AV dest;
+  py_2_av(&pool, &dest, retv, 0);
+  rtmp_proto_packet_return(proto, &pool, 3, reqid, &dest);
+  rt_pool_free(&pool);
+}
