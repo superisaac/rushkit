@@ -223,7 +223,7 @@ extern "C" {
     int num_down_bytes;
     clock_t last_tm_bytes_read;
 
-    double next_request_id;
+    long next_request_id;
   } RTMP_PROTO;
 
   typedef RTMP_PROTO * PPROTO;
@@ -243,7 +243,7 @@ extern "C" {
     void (*on_packet_audio)(PPROTO proto, PACKET *);
     void (*on_packet_video)(PPROTO proto, PACKET *);
     void (*on_amf_call)(PPROTO prot, int channle_id,
-			double request_id, struct amf_value_t * method_name,
+			long request_id, struct amf_value_t * method_name,
 			int argc, struct amf_value_t * args);
     void (*on_log)(PPROTO proto, char * level, char * message);
 
@@ -257,7 +257,7 @@ extern "C" {
   void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE *);
   void rtmp_proto_free(PPROTO proto);
   CHANNEL * rtmp_proto_get_channel(PPROTO proto);
-  void rtmp_proto_call(PPROTO proto, char * method_name, int argc, struct amf_value_t * argv);
+  long rtmp_proto_call(PPROTO proto, char * method_name, int argc, struct amf_value_t * argv);
   void rtmp_proto_send_bytes_read(PPROTO proto);
 
   void * rtmp_proto_get_user_data(PPROTO proto);
@@ -316,7 +316,6 @@ extern "C" {
     AV value;
   } AK_TABLE_ELEM;
 
-
   AP * amf_ap_alloc(POOL * ppool, byte * data, int dataLen);
   AV * amf_ap_read_next(AP * pap);
   AV * amf_ap_read_array(AP * pap, int *len);
@@ -343,7 +342,7 @@ extern "C" {
 
   void amf_print_string(AK_STRING * pstr);
 
-  int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, double request_id, AV * ret_val);
+  int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, long request_id, AV * ret_val);
 
 #ifdef __cplusplus
 }

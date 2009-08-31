@@ -17,7 +17,7 @@
     void (*on_packet_audio)(PPROTO proto, PACKET *);
     void (*on_packet_video)(PPROTO proto, PACKET *);
     void (*on_amf_call)(PPROTO prot, int channle_id,
-			double request_id, struct amf_value_t * method_name,
+			long request_id, struct amf_value_t * method_name,
 			int argc, struct amf_value_t * args);
     void (*on_log)(PPROTO proto, char * level, char * message);
 
@@ -50,7 +50,7 @@
     int num_down_bytes;
     clock_t last_tm_bytes_read;
 
-    double next_request_id;
+    long next_request_id;
   } RTMP_PROTO;
 typedef RTMP_PROTO * PPROTO;
 
@@ -65,7 +65,7 @@ void environment_init();
 void init_responder(PPROTO  proto, PyObject * responder);
 int feed_data(PPROTO proto, PyObject * data);
 void free_responder(PPROTO proto);
-void amf_return(PPROTO proto, double reqid, PyObject * av);
+void amf_return(PPROTO proto, long reqid, PyObject * av);
 PyObject * get_py_data(PPROTO proto);
-void amf_call(PPROTO proto, char * method_name, PyObject * args);
+long my_amf_call(PPROTO proto, char * method_name, PyObject * args);
 #endif

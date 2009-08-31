@@ -46,7 +46,7 @@ int on_py_write_data(PPROTO proto, byte * data, int len)
   return 0;
 }
 
-void on_py_amf_call(PPROTO proto, int cid, double reqid, AV * method_name, int argc, AV * args)
+void on_py_amf_call(PPROTO proto, int cid, long reqid, AV * method_name, int argc, AV * args)
 {
   PYOBJ func = _get_member(proto, "handleInvoke");
   if(func) {
@@ -58,7 +58,7 @@ void on_py_amf_call(PPROTO proto, int cid, double reqid, AV * method_name, int a
     PYOBJ call_args = av_list_2_py(args, argc);
     Py_XINCREF(call_args);
     
-    PYOBJ arglist = Py_BuildValue("(dOO)", reqid, func_name, call_args);
+    PYOBJ arglist = Py_BuildValue("(lOO)", reqid, func_name, call_args);
     Py_XINCREF(arglist);
 
     PyObject_CallObject(func, arglist);
@@ -99,7 +99,7 @@ void free_responder(PPROTO proto)
   rtmp_proto_set_user_data(proto, NULL);
 }
 
-void amf_return(PPROTO proto, double reqid, PyObject * retv)
+void amf_return(PPROTO proto, long reqid, PyObject * retv)
 {
   POOL pool;
   rt_pool_init(&pool);
@@ -107,9 +107,10 @@ void amf_return(PPROTO proto, double reqid, PyObject * retv)
   py_2_av(&pool, &dest, retv, 0);
   rtmp_proto_packet_return(proto, &pool, 3, reqid, &dest);
   rt_pool_free(&pool);
+  
 }
 
-void amf_call(PPROTO proto, char * method_name, PyObject * args)
+long my_amf_call(PPROTO proto, char * method_name, PyObject * args)
 {
   assert(PyList_Check(args));
   Py_ssize_t argc = PyList_Size(args);
@@ -122,6 +123,8 @@ void amf_call(PPROTO proto, char * method_name, PyObject * args)
     PyObject * elem = PyList_GetItem(args, i);
     py_2_av(&pool, elements + i, elem, 0);
   }
-  rtmp_proto_call(proto, method_name, argc, elements);
+  long request_id = rtmp_proto_call(proto, method_name, argc, elements);
   rt_pool_free(&pool);
+  return request_id;
+
 }

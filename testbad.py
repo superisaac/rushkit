@@ -8,11 +8,12 @@ class RTMPProtocol(Protocol):
         self.transport.write(data)
 
     def handleInvoke(self, reqid, methodname, args):
-        print '---', methodname, args
+        print '---', methodname, args, reqid
         if methodname == 'add':
             if len(args) == 2:
                 rushkit.amf_return(self._proto, reqid, args[0] + args[1])
-                rushkit.amf_call(self._proto, "greeting", ["greet"])
+                print rushkit.my_amf_call(self._proto, "greeting", ["greet"])
+                
     def connectionMade(self):
         print 'connection made'
         self._proto = rushkit.new_RTMP_PROTO()

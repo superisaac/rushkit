@@ -173,7 +173,7 @@ void rtmp_proto_init(PPROTO proto, RTMP_METHOD_TABLE * method_table)
   proto->write_chunk_size = 128;
   proto->last_data = ALLOC(sizeof(byte) * proto->read_chunk_size);
   proto->readBuffer = ALLOC(sizeof(byte) * BUFFER_SZ);
-  proto->next_request_id = 1.0;
+  proto->next_request_id = 1;
   proto->pkg_st = 0;
   proto->num_up_bytes = 0;
   proto->num_down_bytes = 0;
@@ -255,7 +255,7 @@ void rtmp_proto_send_bytes_read(PPROTO proto)
   rtmp_proto_send_packet(proto, NULL, &br_pac, FALSE);
 }
 
-void rtmp_proto_call(PPROTO proto, char * method_name, int argc, AV * argv)
+long rtmp_proto_call(PPROTO proto, char * method_name, int argc, AV * argv)
 {
   int channel_id = 3;
   PACKET call_pac;
@@ -265,13 +265,14 @@ void rtmp_proto_call(PPROTO proto, char * method_name, int argc, AV * argv)
   call_pac.channel.data_type = PAC_INVOKE;
   call_pac.channel.stream_id = 0;
 
-  double request_id = proto->next_request_id;
-  proto->next_request_id++;
+  long request_id = proto->next_request_id;
+  proto->next_request_id = request_id + 1;
   int data_len;
   call_pac.data = amf_pack_call(&proto->pool, method_name, request_id,
 				argc, argv, &data_len);
   call_pac.dataLen = data_len;
   rtmp_proto_send_packet(proto, NULL, &call_pac, FALSE);
+  return request_id;
 }
 
 static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
@@ -282,10 +283,12 @@ static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
   AV * request_id_v = amf_ap_read_next(pap);
   assert(request_id_v->type == AMF_NUMBER);
 
-  double request_id = request_id_v->value.number_t;
+  long request_id = (long)(request_id_v->value.number_t);
 
   if(!amf_string_equal(method_name_v, "_result")) {
-    proto->next_request_id = request_id + 1;
+    if(proto->next_request_id < request_id + 1) {
+      proto->next_request_id = request_id + 1;
+    }
   }
 
   AV * first_arg_v = amf_ap_read_next(pap);
@@ -322,7 +325,7 @@ static void _default_on_packet_invoke(PPROTO proto, PACKET * pac)
   }
 }
 
-int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, double request_id, AV * ret_val)
+int rtmp_proto_packet_return(PPROTO proto, POOL * ppool, int channel_id, long request_id, AV * ret_val)
 {
   if(ppool == NULL) {
     ppool = &(proto->pool);

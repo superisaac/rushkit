@@ -38,7 +38,7 @@ static void _onInvokePacket(PPROTO proto, PACKET * pac)
   cout << "on invoke packet " << endl;
 }
 
-static void _on_amf_call(PPROTO proto, int channelId, double request_id, AV * method_name_v, int argc, AV * argv)
+static void _on_amf_call(PPROTO proto, int channelId, long request_id, AV * method_name_v, int argc, AV * argv)
 {
   if(amf_string_equal(method_name_v, "add")) {
     assert(argc == 2);
