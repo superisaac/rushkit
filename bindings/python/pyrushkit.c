@@ -108,3 +108,20 @@ void amf_return(PPROTO proto, double reqid, PyObject * retv)
   rtmp_proto_packet_return(proto, &pool, 3, reqid, &dest);
   rt_pool_free(&pool);
 }
+
+void amf_call(PPROTO proto, char * method_name, PyObject * args)
+{
+  assert(PyList_Check(args));
+  Py_ssize_t argc = PyList_Size(args);
+  Py_ssize_t i;
+  POOL pool;
+  rt_pool_init(&pool);
+  AV * elements = (AV*)rt_pool_alloc(&pool, sizeof(AV) * argc);
+
+  for(i=0; i< argc; i++) {
+    PyObject * elem = PyList_GetItem(args, i);
+    py_2_av(&pool, elements + i, elem, 0);
+  }
+  rtmp_proto_call(proto, method_name, argc, elements);
+  rt_pool_free(&pool);
+}

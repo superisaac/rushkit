@@ -67,4 +67,5 @@ int feed_data(PPROTO proto, PyObject * data);
 void free_responder(PPROTO proto);
 void amf_return(PPROTO proto, double reqid, PyObject * av);
 PyObject * get_py_data(PPROTO proto);
+void amf_call(PPROTO proto, char * method_name, PyObject * args);
 #endif
