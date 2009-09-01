@@ -41,6 +41,7 @@ class App {
 	_root.main_nc = new NetConnection();
 	_root.main_nc.greeting = function(word) {
 	    trace("greeting from server: " + word);
+	    return 'hhh';
 	};
 	_root.main_nc.onStatus = function(info) {
 	    trace("rtmp nc " + info.code);
